@@ -37,7 +37,8 @@ jobs:
 
         # Set Git to use HTTPS and include token for authentication
         GITHUB_PAT="${{ secrets.PER_TOKEN }}"
-        REPO_URL="https://${GITHUB_PAT}@github.com/PantelisTsagkas/github-aws-ec2.git"
+        # Update to use the correct repository URL
+        REPO_URL="https://${GITHUB_PAT}@github.com/PantelisTsagkas/github-actions-ec2.git"
         BRANCH="main"
         REPO_DIR="$HOME/github-aws-ec2"
         
