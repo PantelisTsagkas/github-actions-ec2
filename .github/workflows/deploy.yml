@@ -35,6 +35,11 @@ jobs:
           npm install -g pm2
         fi
 
+        echo "Installing Jest..."
+        if ! command -v jest &> /dev/null && ! command -v supertest &> /dev/null; then
+          npm install -g jest supertest
+        fi
+
         # Set Git to use HTTPS and include token for authentication
         GITHUB_PAT="${{ secrets.PER_TOKEN }}"
         # Update to use the correct repository URL
