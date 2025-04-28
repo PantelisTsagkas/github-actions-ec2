@@ -50,10 +50,6 @@ jobs:
         cd "$REPO_DIR/simple-web-server"
         npm install
 
-        cd ~/github-aws-ec2/simple-web-server
-        git pull origin main
-        npm install
-
         echo "Starting/restarting application..."
-        pm2 restart server.js || pm2 start server.js
+        pm2 restart "$REPO_DIR/simple-web-server/server.js" || pm2 start "$REPO_DIR/simple-web-server/server.js"
         '
