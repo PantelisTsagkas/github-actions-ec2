@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 3000;
 
 app.get('/', (req, res) => {
   res.send(`
@@ -91,6 +91,10 @@ app.get('/info', (req, res) => {
   });
 });
 
-app.listen(port, '0.0.0.0', () => {
+if (require.main === module) {
+  app.listen(port, '0.0.0.0', () => {
     console.log(`Server running at http://0.0.0.0:${port}`);
   });
+}
+
+module.exports = app;

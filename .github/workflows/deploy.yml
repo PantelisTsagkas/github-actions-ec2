@@ -60,6 +60,9 @@ jobs:
           echo "Installing npm dependencies..."
           npm install
 
+          echo "Running tests..."
+          npm test || { echo "Tests failed. Aborting deployment."; exit 1; }
+
           echo "Starting/restarting application..."
           pm2 restart server.js || pm2 start server.js
         else
