@@ -10,6 +10,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
+    - name: Run tests
+      run: npm test
+
     - name: Deploy to EC2
       env:
         PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
