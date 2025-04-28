@@ -11,7 +11,13 @@ jobs:
     - uses: actions/checkout@v2
     
     - name: Run tests
-      run: npm test
+      run: |
+        # Make sure we can access the simple-web-server directory
+        if [ -d "$REPO_DIR/simple-web-server" ]; then
+          cd "$REPO_DIR/simple-web-server" || { echo "Failed to change to simple-web-server directory"; exit 1; }
+          echo "Installing npm dependencies..."
+          npm install
+          npm test
 
     - name: Deploy to EC2
       env:
