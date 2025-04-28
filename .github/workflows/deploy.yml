@@ -35,13 +35,9 @@ jobs:
           npm install -g pm2
         fi
 
-        REPO_URL="git@github.com:PantelisTsagkas/github-aws-ec2.git"
+        REPO_URL="https://github.com/PantelisTsagkas/github-aws-ec2.git"
         BRANCH="main"
         REPO_DIR="$HOME/github-aws-ec2"
-
-        # Ensure SSH is set up for GitHub
-        mkdir -p ~/.ssh
-        ssh-keyscan -H github.com >> ~/.ssh/known_hosts 2>/dev/null
 
         echo "Cloning or updating repository..."
         if [ -d "$REPO_DIR/.git" ]; then
