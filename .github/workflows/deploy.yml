@@ -35,9 +35,14 @@ jobs:
           npm install -g pm2
         fi
 
-        REPO_URL="https://github.com/PantelisTsagkas/github-aws-ec2.git"
+        # Set Git to use HTTPS and include token for authentication
+        GITHUB_PAT="${{ secrets.PER_TOKEN }}"
+        REPO_URL="https://${GITHUB_PAT}@github.com/PantelisTsagkas/github-aws-ec2.git"
         BRANCH="main"
         REPO_DIR="$HOME/github-aws-ec2"
+        
+        # Configure git to not prompt for credentials
+        git config --global credential.helper store
 
         echo "Cloning or updating repository..."
         if [ -d "$REPO_DIR/.git" ]; then
