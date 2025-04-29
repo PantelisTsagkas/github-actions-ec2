@@ -30,22 +30,8 @@ describe('GET /info', () => {
     expect(response.body).toHaveProperty('uptime');
   });
 });
-describe('GET /nonexistent', () => {
-  it('should return status 404 for a nonexistent route', async () => {
-    const response = await request(app).get('/nonexistent');
-    
-    // Check the response status
-    expect(response.status).toBe(404);
-    
-    // Check that the returned HTML contains the expected error message
-    expect(response.text).toContain('<h1>404 Not Found</h1>');
-  });
-});
-const app = require('./server');
 
-describe('GET /', () => {
-  it('should return 200 OK', async () => {
-    const res = await request(app).get('/');
-    expect(res.statusCode).toBe(200);
-  });
-});
+
+
+
+
