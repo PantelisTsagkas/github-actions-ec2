@@ -41,3 +41,11 @@ describe('GET /nonexistent', () => {
     expect(response.text).toContain('<h1>404 Not Found</h1>');
   });
 });
+const app = require('./server');
+
+describe('GET /', () => {
+  it('should return 200 OK', async () => {
+    const res = await request(app).get('/');
+    expect(res.statusCode).toBe(200);
+  });
+});
