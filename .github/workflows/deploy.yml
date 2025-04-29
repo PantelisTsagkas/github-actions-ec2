@@ -10,6 +10,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
+    - name: Run tests
+      run: |
+        cd simple-web-server || { echo "Failed to change to simple-web-server directory"; exit 1; }
+        echo "Installing npm dependencies..."
+        npm install || { echo "Failed to install dependencies"; exit 1; }
+        npm test || { echo "Tests failed"; exit 1; }
+
     - name: Deploy to EC2
       env:
         PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
@@ -33,6 +40,11 @@ jobs:
         echo "Installing PM2..."
         if ! command -v pm2 &> /dev/null; then
           npm install -g pm2
+        fi
+
+        echo "Installing Jest..."
+        if ! command -v jest &> /dev/null && ! command -v supertest &> /dev/null; then
+          npm install -g jest supertest
         fi
 
         # Set Git to use HTTPS and include token for authentication

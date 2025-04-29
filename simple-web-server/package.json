@@ -1,11 +1,9 @@
 {
   "name": "simple-web-server",
   "version": "1.0.0",
-  
   "main": "server.js",
   "scripts": {
     "test": "jest",
-    "prestart": "npm test",
     "start": "node server.js"
   },
   "keywords": [],
@@ -16,7 +14,7 @@
     "express": "^5.1.0"
   },
   "devDependencies": {
-    "jest": "^29.0.0",
-    "supertest": "^6.3.0"
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
   }
 }
