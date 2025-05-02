@@ -26,7 +26,7 @@ app.get('/', (req, res) => {
                 box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             }
             h1 {
-                color:rgb(206, 118, 18);
+                color:rgb(99, 18, 206);
                 border-bottom: 2px solid #3498db;
                 padding-bottom: 10px;
             }
