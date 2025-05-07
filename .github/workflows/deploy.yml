@@ -2,73 +2,96 @@ name: Deploy to EC2
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
-  deploy:
+  test:
+    name: Test Application
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'simple-web-server/package-lock.json'
+      
+      - name: Install dependencies
+        working-directory: ./simple-web-server
+        run: npm ci
+      
+      - name: Run tests
+        working-directory: ./simple-web-server
+        run: npm test
+
+  deploy:
+    name: Deploy to EC2
+    needs: test  # Only deploy if tests pass
+    runs-on: ubuntu-latest
+    environment: production  # Enables required approval for production
     
-    - name: Deploy to EC2
-      env:
-        PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
-        HOST: ${{ secrets.EC2_HOST }}
-        USER: ${{ secrets.EC2_USER }}
-      run: |
-        echo "$PRIVATE_KEY" > github-ec2.pem && chmod 600 github-ec2.pem
-        ssh -o StrictHostKeyChecking=no -i github-ec2.pem ${USER}@${HOST} '
-        echo "Current directory: $(pwd)"
-        echo "Listing home directory:"
-        ls -la ~
-
-        echo "Installing Node.js..."
-        if ! command -v nvm &> /dev/null; then
-          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-          export NVM_DIR="$HOME/.nvm"
-          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-        fi
-        nvm install node
-
-        echo "Installing PM2..."
-        if ! command -v pm2 &> /dev/null; then
-          npm install -g pm2
-        fi
-
-        # Set Git to use HTTPS and include token for authentication
-        GITHUB_PAT="${{ secrets.PER_TOKEN }}"
-        # Update to use the correct repository URL
-        REPO_URL="https://${GITHUB_PAT}@github.com/PantelisTsagkas/github-actions-ec2.git"
-        BRANCH="main"
-        REPO_DIR="$HOME/github-aws-ec2"
-        
-        # Configure git to not prompt for credentials
-        git config --global credential.helper store
-
-        echo "Cloning or updating repository..."
-        if [ -d "$REPO_DIR/.git" ]; then
-          cd "$REPO_DIR"
-          git pull origin "$BRANCH" || echo "Failed to pull updates"
-        else
-          git clone "$REPO_URL" "$REPO_DIR" || { echo "Failed to clone repository"; exit 1; }
-          cd "$REPO_DIR" || { echo "Failed to change directory"; exit 1; }
-        fi
-
-        # Make sure we can access the simple-web-server directory
-        if [ -d "$REPO_DIR/simple-web-server" ]; then
-          cd "$REPO_DIR/simple-web-server" || { echo "Failed to change to simple-web-server directory"; exit 1; }
-          echo "Installing npm dependencies..."
-          npm install
-
-          echo "Running tests..."
-          npm test || { echo "Tests failed. Aborting deployment."; exit 1; }
-
-          echo "Starting/restarting application..."
-          pm2 restart server.js || pm2 start server.js
-        else
-          echo "Error: simple-web-server directory not found"
-          echo "Contents of $REPO_DIR:"
-          ls -la "$REPO_DIR"
-          exit 1
-        fi
-        '
+    steps:
+      - name: Deploy to EC2 instance
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script_stop: true  # Stop script execution if any command fails
+          script: |
+            # Setup directory
+            REPO_DIR="$HOME/github-aws-ec2"
+            mkdir -p "$REPO_DIR"
+            
+            # Clone or update repository
+            if [ -d "$REPO_DIR/.git" ]; then
+              cd "$REPO_DIR"
+              git fetch origin
+              git reset --hard origin/main
+            else
+              # Using deploy key method instead of personal token
+              git clone https://github.com/PantelisTsagkas/github-actions-ec2.git "$REPO_DIR"
+            fi
+            
+            # Make sure Node.js is available
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            
+            if ! command -v node &> /dev/null; then
+              echo "Installing Node.js..."
+              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+              export NVM_DIR="$HOME/.nvm"
+              [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+              nvm install 18
+            fi
+            
+            # Ensure PM2 is installed
+            if ! command -v pm2 &> /dev/null; then
+              echo "Installing PM2..."
+              npm install -g pm2
+            fi
+            
+            # Deploy application
+            if [ -d "$REPO_DIR/simple-web-server" ]; then
+              cd "$REPO_DIR/simple-web-server"
+              echo "Installing dependencies..."
+              npm ci
+              
+              echo "Starting/restarting application with PM2..."
+              pm2 restart server.js 2>/dev/null || pm2 start server.js
+              
+              # Save PM2 process list and startup configuration
+              pm2 save
+              
+              echo "Application deployed successfully!"
+              echo "Health check:"
+              curl -s http://localhost:3000/health || echo "Health check failed"
+            else
+              echo "Error: simple-web-server directory not found"
+              echo "Contents of $REPO_DIR:"
+              ls -la "$REPO_DIR"
+              exit 1
+            fi
