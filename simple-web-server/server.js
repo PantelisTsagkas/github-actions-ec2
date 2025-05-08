@@ -27,7 +27,7 @@ app.get('/', (req, res) => {
             }
             h1 {
                 color:rgb(99, 18, 206);
-                border-bottom: 2px solid #3498db;
+                border-bottom: 2px solid red;
                 padding-bottom: 10px;
             }
             .step {
