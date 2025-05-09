@@ -47,7 +47,7 @@ This project demonstrates a continuous integration and continuous deployment (CI
 
    ```bash
    git clone https://github.com/PantelisTsagkas/github-actions-ec2.git
-   cd PantelisTsagkas/github-actions-ec2
+   cd github-actions-ec2
    ```
 1.1 Change directory
 
