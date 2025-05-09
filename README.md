@@ -46,14 +46,19 @@ This project demonstrates a continuous integration and continuous deployment (CI
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/your-repository.git
-   cd your-repository
+   git clone https://github.com/PantelisTsagkas/github-actions-ec2.git
+   cd PantelisTsagkas/github-actions-ec2
    ```
+1.1 Change directory
 
+   ```bash
+   cd simple-web-server
+   ```
 2. Install dependencies:
 
    ```bash
    npm install
+   npm run dev
    ```
 
 3. Configure your GitHub Secrets for AWS EC2 deployment.
@@ -67,9 +72,26 @@ This project demonstrates a continuous integration and continuous deployment (CI
 
 ```json
 {
-  "name": "Simple Web Server",
+  "name": "simple-web-server",
   "version": "1.0.0",
-  "uptime": "[seconds the server has been running]"
+  
+  "main": "server.js",
+  "scripts": {
+    "test": "jest",
+    "prestart": "npm test",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "supertest": "^6.3.0"
+  }
 }
 ```
 
